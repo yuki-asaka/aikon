@@ -28,12 +28,11 @@ services:
     env_file:
       - ./frontend/.env
 
-  # バックエンドのbuildステージまでのPoetry操作用サービス
-  backend-build:
+  poetry:
     build:
       context: .
       dockerfile: backend/Dockerfile
-      target: build
+      target: builder
     volumes:
       - ./backend:/app
     working_dir: /app

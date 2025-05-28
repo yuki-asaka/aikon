@@ -27,3 +27,17 @@ services:
       - CHOKIDAR_USEPOLLING=true
     env_file:
       - ./frontend/.env
+
+  # バックエンドのbuildステージまでのPoetry操作用サービス
+  backend-build:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+      target: build
+    volumes:
+      - ./backend:/app
+    working_dir: /app
+    env_file:
+      - ./backend/.env
+    entrypoint: ["/bin/bash"]
+    tty: true

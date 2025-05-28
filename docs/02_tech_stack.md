@@ -11,16 +11,33 @@
 | コンテナ      | Docker 24.x, docker-compose 2.x                      |
 | 開発環境      | PyCharm, Docker interpreter                          |
 
-## 補足
+## フロントエンド構成
 
-- Poetry管理下で開発する場合、`backend/pyproject.toml` をプロジェクトルートで作成してください。
-- `poetry.lock` は `poetry install` 実行時に自動生成されます。
-- どちらも未作成の場合は、`poetry init` で `pyproject.toml` を作成し、必要なパッケージを追加してください。
-- Dockerイメージはマルチステージビルドで、Poetry仮想環境を `/opt/venv` 配下に作成し、本番ステージでパスを通して実行します。
-- `docker-compose.yml` では、バックエンド・フロントエンドそれぞれで `.env` ファイルを分離して管理します。
-- バックエンド開発時はボリュームマウントにより `/app` 配下が上書きされるため、仮想環境は `/opt/venv` などマウントされない場所に作成しています。
-- Uvicornの実行は `python -m uvicorn ...` 形式でローダ問題を回避しています。
-- バックエンドには `/health` エンドポイントを実装し、docker compose の `healthcheck` で利用しています。
+- ディレクトリ: `frontend/`
+- 主要ファイル:  
+  - `package.json`（React, Tailwind, 開発用スクリプト等を管理）
+  - `src/`（Reactコンポーネント、エントリポイント）
+  - `public/`（HTMLテンプレート等）
+  - `.env`（フロントエンド用環境変数）
+
+## バックエンド構成
+
+- ディレクトリ: `backend/`
+- 主要ファイル:  
+  - `app/main.py`（FastAPIアプリ本体、/healthエンドポイント含む）
+  - `pyproject.toml`, `poetry.lock`（Poetry依存管理）
+  - `.env`（バックエンド用環境変数）
+  - `Dockerfile`（マルチステージビルド、Poetry仮想環境を/opt/venv配下に作成）
+
+## Docker・開発運用
+
+- `docker-compose.yml` で backend, frontend サービスを管理
+  - 各サービスで `.env` ファイルを分離
+  - backendは `/health` エンドポイントでhealthcheck
+  - frontendは `npm run dev` でホットリロード
+- バックエンドの仮想環境は `/opt/venv` 配下に作成し、PATHを通して実行
+- 本番環境では `appuser` 権限で安全に実行
+- バックエンドは `python -m uvicorn app.main:app ...` 形式で起動しローダ問題を回避
 
 ## 出力画像
 

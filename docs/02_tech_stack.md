@@ -7,7 +7,7 @@
 | フロントエンド | React 18.x, Tailwind CSS 3.x, Node.js 22.x, npm     |
 | バックエンド   | FastAPI 0.110.x, Python 3.12.x                      |
 | 依存管理      | Poetry 1.8.x（バックエンド）, npm（フロントエンド）   |
-| 推論エンジン   | Replicate API（Stable Diffusion）                    |
+| 推論エンジン   | Replicate API（Stable Diffusion, ControlNet, InstantID等） |
 | コンテナ      | Docker 24.x, docker-compose 2.x                      |
 | 開発環境      | PyCharm, Docker interpreter                          |
 
@@ -43,4 +43,3 @@
 
 - 形式: PNG
 - サイズ: 400x400px
-

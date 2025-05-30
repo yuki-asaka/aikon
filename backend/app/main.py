@@ -33,31 +33,23 @@ async def upload_image(file: UploadFile = File(...)):
     return JSONResponse(content={"filename": file.filename, "content_type": file.content_type})
 
 
-async def remove_bg_with_rembg(file: UploadFile) -> bytes:
-
+async def remove_bg_with_rembg(image_bytes: bytes) -> bytes:
     from rembg import remove
-
-    image_bytes = await file.read()
     result = remove(image_bytes)
     return result
 
 
-async def remove_bg_with_rembg_and_white_bg(file: UploadFile) -> bytes:
+async def remove_bg_with_rembg_and_white_bg(image_bytes: bytes) -> bytes:
     import io
-
     from PIL import Image, ImageFilter
     from rembg import remove
 
-    image_bytes = await file.read()
     fg = Image.open(io.BytesIO(remove(image_bytes))).convert("RGBA")
-
     alpha = fg.split()[3].filter(ImageFilter.GaussianBlur(radius=4))
     fg.putalpha(alpha)
-
     bg = Image.new("RGBA", fg.size, (255, 255, 255, 255))
     composited = Image.alpha_composite(bg, fg)
     out = io.BytesIO()
-
     composited.convert("RGB").save(out, format="PNG")
     return out.getvalue()
 
@@ -67,7 +59,8 @@ async def remove_bg(file: UploadFile = File(...)):
     if not file.content_type.startswith("image/"):
         raise HTTPException(status_code=400, detail="画像ファイルをアップロードしてください")
     try:
-        result_bytes = await remove_bg_with_rembg(file)
+        image_bytes = await file.read()
+        result_bytes = await remove_bg_with_rembg(image_bytes)
         encoded = base64.b64encode(result_bytes).decode("utf-8")
         return JSONResponse(
             content={"message": "背景除去成功", "size": len(result_bytes), "image_base64": encoded},
@@ -127,10 +120,11 @@ async def generate_illustration(
         raise HTTPException(status_code=400, detail="画像ファイルをアップロードしてください")
 
     try:
+        image_bytes = await file.read()
         if remove_bg:
-            input_bytes = await remove_bg_with_rembg_and_white_bg(file)
+            input_bytes = await remove_bg_with_rembg_and_white_bg(image_bytes)
         else:
-            input_bytes = await file.read()
+            input_bytes = image_bytes
 
         image = Image.open(io.BytesIO(input_bytes)).convert("RGB")
         image = crop_center_face_opencv(image, 400)

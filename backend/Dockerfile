@@ -30,7 +30,9 @@ FROM python:3.12-slim
 WORKDIR /app
 
 ENV VIRTUAL_ENV=/opt/venv/aikon-venv \
-    PATH="/opt/venv/aikon-venv/bin:$PATH"
+    PATH="/opt/venv/aikon-venv/bin:$PATH" \
+    NUMBA_DISABLE_CACHE=1 \
+    NUMBA_CACHE_DIR=/tmp
 
 COPY --from=builder /opt/venv/aikon-venv /opt/venv/aikon-venv
 COPY --from=builder /app /app

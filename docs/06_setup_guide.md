@@ -77,3 +77,56 @@ docker-compose up --build
 - 詳細な技術構成やAPI仕様は `docs/` ディレクトリ内の他ドキュメントを参照してください。
 - 質問や不明点はIssueで報告してください。
 
+---
+
+## 9. テスト・Linterの実行
+
+### バックエンド
+
+- テスト実行（pytest）:
+  ```sh
+  docker-compose exec backend poetry run pytest
+  ```
+- Linter実行（ruff）:
+  ```sh
+  docker-compose exec backend poetry run ruff app/
+  ```
+
+### フロントエンド
+
+- テスト実行（Jestなど）:
+  ```sh
+  docker-compose exec frontend npm test
+  ```
+- Linter実行（ESLint）:
+  ```sh
+  docker-compose exec frontend npm run lint
+  ```
+
+---
+
+## 10. バックエンドAPIの起動・確認
+
+- バックエンドは `python -m uvicorn app.main:app --host 0.0.0.0 --port 8000` で起動
+- `/health` エンドポイントで稼働確認
+- 主要API:
+    - `POST /upload` : 画像アップロード
+    - `POST /generate` : イラスト生成
+    - `GET /result/{id}` : 画像取得
+
+---
+
+## 11. APIリクエスト例
+
+```sh
+# 画像アップロード
+curl -F "file=@test.png" http://localhost:8000/upload
+
+# イラスト生成
+curl -X POST -H "Content-Type: application/json" \
+  -d '{"image_id": "xxxx", "style": "anime"}' \
+  http://localhost:8000/generate
+
+# 生成画像取得
+curl http://localhost:8000/result/yyyy --output result.png
+```

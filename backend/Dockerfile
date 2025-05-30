@@ -13,12 +13,12 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libffi-dev libssl-dev && rm -rf /var/lib/apt/lists/*
 RUN pip install --no-cache-dir poetry
 
-COPY ./backend/pyproject.toml ./
-COPY ./backend/poetry.lock ./backend/poetry.lock
+COPY pyproject.toml ./
+COPY poetry.lock ./
 
 RUN poetry install --no-root
 
-COPY ./backend .
+COPY . .
 
 RUN VENV_DIR=$(ls /opt/venv) && \
     chmod -R a+rx /opt/venv/$VENV_DIR && \

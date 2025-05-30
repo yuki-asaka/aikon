@@ -1,12 +1,12 @@
+import base64
 import os
 
 import cv2
 import numpy as np
-from PIL import Image
-from fastapi import FastAPI, File, UploadFile, HTTPException, Form
-from fastapi.responses import JSONResponse
+from fastapi import FastAPI, File, Form, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
-import base64
+from fastapi.responses import JSONResponse
+from PIL import Image
 
 app = FastAPI()
 
@@ -20,9 +20,11 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+
 @app.get("/health")
 def health_check():
     return {"status": "ok"}
+
 
 @app.post("/upload")
 async def upload_image(file: UploadFile = File(...)):
@@ -30,18 +32,21 @@ async def upload_image(file: UploadFile = File(...)):
         raise HTTPException(status_code=400, detail="画像ファイルをアップロードしてください")
     return JSONResponse(content={"filename": file.filename, "content_type": file.content_type})
 
+
 async def remove_bg_with_rembg(file: UploadFile) -> bytes:
+
     from rembg import remove
-    import io
 
     image_bytes = await file.read()
     result = remove(image_bytes)
     return result
 
+
 async def remove_bg_with_rembg_and_white_bg(file: UploadFile) -> bytes:
-    from rembg import remove
-    from PIL import Image, ImageFilter
     import io
+
+    from PIL import Image, ImageFilter
+    from rembg import remove
 
     image_bytes = await file.read()
     fg = Image.open(io.BytesIO(remove(image_bytes))).convert("RGBA")
@@ -56,6 +61,7 @@ async def remove_bg_with_rembg_and_white_bg(file: UploadFile) -> bytes:
     composited.convert("RGB").save(out, format="PNG")
     return out.getvalue()
 
+
 @app.post("/remove_bg")
 async def remove_bg(file: UploadFile = File(...)):
     if not file.content_type.startswith("image/"):
@@ -64,15 +70,12 @@ async def remove_bg(file: UploadFile = File(...)):
         result_bytes = await remove_bg_with_rembg(file)
         encoded = base64.b64encode(result_bytes).decode("utf-8")
         return JSONResponse(
-            content={
-                "message": "背景除去成功",
-                "size": len(result_bytes),
-                "image_base64": encoded
-            },
-            headers={"Content-Type": "application/json"}
+            content={"message": "背景除去成功", "size": len(result_bytes), "image_base64": encoded},
+            headers={"Content-Type": "application/json"},
         )
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"背景除去失敗: {str(e)}")
+
 
 def crop_center_face_opencv(image: Image, size: int = 400) -> Image:
     img_np = np.array(image)
@@ -104,17 +107,17 @@ def crop_center_face_opencv(image: Image, size: int = 400) -> Image:
         return new_img
     return cropped
 
+
 @app.post("/generate")
 async def generate_illustration(
-    file: UploadFile = File(...),
-    style: str = Form("anime"),
-    remove_bg: bool = Form(False)
+    file: UploadFile = File(...), style: str = Form("anime"), remove_bg: bool = Form(False)
 ):
-    import replicate
+    import io
     import tempfile
     import traceback
+
+    import replicate
     from PIL import Image
-    import io
 
     api_token = os.getenv("REPLICATE_API_TOKEN")
     if not api_token:
@@ -147,12 +150,7 @@ async def generate_illustration(
         if remove_bg:
             prompt += ", plain white background, no shadows"
 
-        input_params = {
-            "image": open(image_path, "rb"),
-            "prompt": prompt,
-            "image_strength": 0.7,
-            "guidance_scale": 15
-        }
+        input_params = {"image": open(image_path, "rb"), "prompt": prompt, "image_strength": 0.7, "guidance_scale": 15}
 
         output = replicate.run(
             f"{model}:{version}",
@@ -173,7 +171,4 @@ async def generate_illustration(
         raise Exception(f"Replicate APIレスポンス: {output}")
     except Exception as e:
         tb = traceback.format_exc()
-        raise HTTPException(
-            status_code=500,
-            detail=f"Replicate APIから画像生成に失敗しました: {str(e)}\n{tb}"
-        )
+        raise HTTPException(status_code=500, detail=f"Replicate APIから画像生成に失敗しました: {str(e)}\n{tb}")

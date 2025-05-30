@@ -3,11 +3,14 @@ FROM python:3.12-slim AS builder
 
 ENV PIP_NO_CACHE_DIR=1 \
     PIP_DISABLE_PIP_VERSION_CHECK=1 \
-    POETRY_VIRTUALENVS_PATH=/opt/venv
+    POETRY_VIRTUALENVS_PATH=/opt/venv \
+    DLIB_DEPS="cmake libboost-all-dev"
 
 WORKDIR /app
 
-RUN apt-get update && apt-get install -y --no-install-recommends gcc libffi-dev libssl-dev && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    gcc \
+    libffi-dev libssl-dev && rm -rf /var/lib/apt/lists/*
 RUN pip install --no-cache-dir poetry
 
 COPY ./backend/pyproject.toml ./
@@ -34,7 +37,9 @@ COPY --from=builder /app /app
 
 RUN useradd -r -u 1000 appuser \
  && chown -R appuser:appuser /app \
- && chown -R appuser:appuser /opt/venv
+ && chown -R appuser:appuser /opt/venv \
+ && mkdir -p /home/appuser \
+ && chown -R appuser:appuser /home/appuser
 
 USER appuser
 

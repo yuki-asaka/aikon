@@ -1,0 +1,16 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "module": "esnext",
+    "types": [
+      "react",
+      "react-dom",
+      "jest",
+      "@testing-library/jest-dom"
+    ]
+  },
+  "include": [
+    "src",
+    "vite.config.ts"
+  ]
+}

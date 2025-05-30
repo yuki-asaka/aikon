@@ -9,7 +9,13 @@
     "esModuleInterop": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
-    "types": ["react", "react-dom"]
+    "types": [
+      "react",
+      "react-dom",
+      "jest",
+      "@testing-library/jest-dom",
+      "vite/client"
+    ]
   },
   "include": [
     "src",

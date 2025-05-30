@@ -1,6 +1,6 @@
 import React, {useState} from "react";
 
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
+const API_URL = process.env.VITE_API_URL || "http://localhost:8000";
 
 export default function GenerateIllustration() {
     const [file, setFile] = useState<File | null>(null);
@@ -92,8 +92,9 @@ export default function GenerateIllustration() {
         <div className="w-full max-w-lg mx-auto p-8 bg-white/90 rounded-3xl shadow-2xl border border-slate-200 backdrop-blur-sm">
             <form onSubmit={handleSubmit} className="space-y-7">
                 <div>
-                    <label className="block mb-2 font-semibold text-slate-700">画像ファイル</label>
+                    <label htmlFor="file-input" className="block mb-2 font-semibold text-slate-700">画像ファイル</label>
                     <input
+                        id="file-input"
                         type="file"
                         accept="image/*"
                         onChange={handleFileChange}
@@ -101,8 +102,9 @@ export default function GenerateIllustration() {
                     />
                 </div>
                 <div>
-                    <label className="block mb-2 font-semibold text-slate-700">スタイル</label>
+                    <label htmlFor="style-select" className="block mb-2 font-semibold text-slate-700">スタイル</label>
                     <select
+                        id="style-select"
                         value={style}
                         onChange={handleStyleChange}
                         className="w-full border border-slate-300 rounded-xl p-2.5 shadow-sm bg-slate-50 focus:outline-none focus:ring-2 focus:ring-blue-400 transition"
@@ -112,8 +114,9 @@ export default function GenerateIllustration() {
                     </select>
                 </div>
                 <div>
-                    <label className="inline-flex items-center cursor-pointer select-none">
+                    <label htmlFor="remove-bg-checkbox" className="inline-flex items-center cursor-pointer select-none">
                         <input
+                            id="remove-bg-checkbox"
                             type="checkbox"
                             checked={removeBg}
                             onChange={handleRemoveBgChange}

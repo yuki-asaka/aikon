@@ -9,43 +9,55 @@
 └────────────┘     │
                    ▼
 [ Replicate API による画像生成 ]
+    ▲
+    │
+  認証（Firebase Auth, IDトークン）
 ```
 
 ## API 概要
 
 | エンドポイント | 内容 |
 |----------------|------|
-| POST `/upload` | 画像アップロード |
-| POST `/generate` | 外部APIを呼び出し画像生成 |
-| GET `/result/{id}` | 画像取得 |
+| POST `/upload` | 画像アップロード（認証必須/Firebase IDトークン） |
+| POST `/generate` | 外部APIを呼び出し画像生成（認証必須/Firebase IDトークン） |
+| GET `/result/{id}` | 画像取得（認証必須/Firebase IDトークン） |
+| GET `/health` | サービス稼働確認用（認証不要） |
 
 ## バックエンドAPI設計・処理フロー
 
-1. `POST /upload`  
+1. **フロントエンドでFirebase Authenticationによるログインを実施**
+   - Googleアカウント等でログインし、IDトークンを取得
+   - 以降のAPIリクエスト時、HTTPヘッダ `Authorization: Bearer <Firebase IDトークン>` を付与
+
+2. `POST /upload`  
+   - Firebase IDトークンをヘッダで受け取り、バックエンドで検証
    - ユーザーから画像ファイルを受信し、一時保存
    - レスポンスで画像IDを返却
 
-2. `POST /generate`  
+3. `POST /generate`  
+   - Firebase IDトークンをヘッダで受け取り、バックエンドで検証
    - 画像IDとスタイル等のパラメータを受け取り、Replicate API へリクエスト
    - 生成処理後、結果画像を保存し、結果IDを返却
 
-3. `GET /result/{id}`  
+4. `GET /result/{id}`  
+   - Firebase IDトークンをヘッダで受け取り、バックエンドで検証
    - 結果IDで生成済み画像を返却
 
-4. `GET /health`  
-   - サービス稼働確認用
+5. `GET /health`  
+   - サービス稼働確認用（認証不要）
 
 ---
 
 ## 例: APIリクエスト/レスポンス
 
 - `/upload`  
-  - リクエスト: multipart/form-data（画像ファイル）
+  - リクエスト: multipart/form-data（画像ファイル, AuthorizationヘッダにFirebase IDトークン）
   - レスポンス: `{ "image_id": "xxxx" }`
 
 - `/generate`  
-  - リクエスト: `{ "image_id": "xxxx", "style": "anime" }`
+  - リクエスト: `{ "image_id": "xxxx", "style": "anime" }`（Authorizationヘッダ必須）
   - レスポンス: `{ "result_id": "yyyy" }`
 
 - `/result/yyyy`  
-  - 画像データ（PNG）
+  - 画像データ（PNG, Authorizationヘッダ必須）
+

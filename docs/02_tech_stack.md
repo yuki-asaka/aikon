@@ -14,6 +14,7 @@
 | バックエンドLinter | ruff                                            |
 | フロントエンドテスト | Jest                                           |
 | フロントエンドLinter | ESLint                                        |
+| 認証         | Firebase Authentication（Googleアカウント等）         |
 
 ## フロントエンド構成
 

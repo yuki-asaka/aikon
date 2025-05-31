@@ -130,3 +130,28 @@ curl -X POST -H "Content-Type: application/json" \
 # 生成画像取得
 curl http://localhost:8000/result/yyyy --output result.png
 ```
+
+---
+
+## 12. 自動デプロイ（Vercel/Render）
+
+### フロントエンド（Vercel）
+
+- `frontend/` ディレクトリは [Vercel](https://vercel.com/) に連携し、GitHubリポジトリへのpushで自動デプロイされます。
+- Vercelのプロジェクト設定で、`root directory` を `frontend` に指定してください。
+- 必要な環境変数（APIエンドポイントやFirebase設定など）はVercelの「Environment Variables」に設定してください。
+- デプロイ後、Vercelの提供するURLでフロントエンドが公開されます。
+
+### バックエンド（Render）
+
+- `backend/` ディレクトリは [Render](https://render.com/) に連携し、GitHubリポジトリへのpushで自動デプロイされます。
+- RenderのWeb Serviceとして新規作成し、`build command` や `start command` は通常通り（例: `poetry install` / `python -m uvicorn app.main:app --host 0.0.0.0 --port 8000`）。
+- 必要な環境変数（APIキーやFirebaseプロジェクト情報など）はRenderの「Environment」設定で追加してください。
+- デプロイ後、Renderの提供するURLでバックエンドAPIが公開されます。
+
+---
+
+## 13. デプロイ後の動作確認
+
+- フロントエンドURL（Vercel）とバックエンドAPI URL（Render）をそれぞれ確認し、疎通・認証・画像生成ができることをチェックしてください。
+- フロントエンドの `.env` にはバックエンドAPIのRender URLを指定してください。

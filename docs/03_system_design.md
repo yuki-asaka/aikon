@@ -5,10 +5,10 @@
 ```
 ┌────────────┐ POST /upload
 │ Frontend UI │ ───────────────────▶ │ FastAPI Backend │
-│ React + Tailwind │ ◀────── 生成画像URL
+│ React + Tailwind │ ◀────── 生成アイコンURL
 └────────────┘     │
                    ▼
-[ Replicate API による画像生成 ]
+[ Replicate API によるアイコン生成 ]
     ▲
     │
   認証（Firebase Auth, IDトークン）
@@ -19,8 +19,8 @@
 | エンドポイント | 内容 |
 |----------------|------|
 | POST `/upload` | 画像アップロード（認証必須/Firebase IDトークン） |
-| POST `/generate` | 外部APIを呼び出し画像生成（認証必須/Firebase IDトークン） |
-| GET `/result/{id}` | 画像取得（認証必須/Firebase IDトークン） |
+| POST `/generate` | 外部APIを呼び出しアイコン生成（認証必須/Firebase IDトークン） |
+| GET `/result/{id}` | アイコン画像取得（認証必須/Firebase IDトークン） |
 | GET `/health` | サービス稼働確認用（認証不要） |
 
 ## バックエンドAPI設計・処理フロー
@@ -37,11 +37,11 @@
 3. `POST /generate`  
    - Firebase IDトークンをヘッダで受け取り、バックエンドで検証
    - 画像IDとスタイル等のパラメータを受け取り、Replicate API へリクエスト
-   - 生成処理後、結果画像を保存し、結果IDを返却
+   - 生成処理後、結果アイコン画像を保存し、結果IDを返却
 
 4. `GET /result/{id}`  
    - Firebase IDトークンをヘッダで受け取り、バックエンドで検証
-   - 結果IDで生成済み画像を返却
+   - 結果IDで生成済みアイコン画像を返却
 
 5. `GET /health`  
    - サービス稼働確認用（認証不要）
@@ -59,5 +59,6 @@
   - レスポンス: `{ "result_id": "yyyy" }`
 
 - `/result/yyyy`  
-  - 画像データ（PNG, Authorizationヘッダ必須）
+  - アイコン画像データ（PNG, Authorizationヘッダ必須）
+
 

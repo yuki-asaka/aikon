@@ -6,7 +6,7 @@
 |---------|------|---------|
 | 1 | Dockerで環境構築（React + FastAPI） | 半日〜1日 |
 | 2 | FastAPIでAPI設計と画像受信処理 | 半日 |
-| 3 | Replicate API連携でイラスト生成 | 半日 |
+| 3 | Replicate API連携でアイコン生成 | 半日 |
 | 4 | React UIでアップロード＆結果表示 | 1日 |
 | 5 | 接続確認・デバッグ | 半日 |
 | 6 | 認証機能の実装（Firebase AuthenticationによるGoogle等ログイン、IDトークン検証） | 0.5日 |
@@ -32,7 +32,7 @@
 ## バックエンド実装進捗
 
 - FastAPI による主要API（/upload, /generate, /result, /health）を実装済み
-- Replicate API 連携によるイラスト生成処理を組み込み済み
+- Replicate API 連携によるアイコン生成処理を組み込み済み
 - 画像ファイルの一時保存・ID管理方式を採用
 
 今後の拡張ポイント:
@@ -47,3 +47,4 @@
 - 要件定義（`docs/01_requirements.md`）に記載の機能を順次実装し、MVP完成後に追加要件を検討する。
 - モデル選定や背景除去はReplicate API等の外部サービスを活用予定。
 - 工数は目安であり、API仕様やモデル精度によって変動する可能性あり。
+

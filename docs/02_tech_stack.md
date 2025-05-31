@@ -38,7 +38,7 @@
 
 - FastAPI で REST API を実装
 - 画像アップロード、生成、取得の各エンドポイントを提供
-- Replicate API との連携は `POST /generate` で実施
+- Replicate API との連携は `POST /generate` で実施（アイコン生成）
 - 画像ファイルは一時ディレクトリに保存し、IDで管理
 - `/health` エンドポイントで稼働確認
 
@@ -63,3 +63,4 @@
 - バックエンドの仮想環境は `/opt/venv` 配下に作成し、PATHを通して実行
 - 本番環境では `appuser` 権限で安全に実行
 - バックエンドは `python -m uvicorn app.main:app ...` 形式で起動しローダ問題を回避
+

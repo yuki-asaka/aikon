@@ -89,25 +89,44 @@ export default function GenerateIllustration() {
     };
 
     return (
-        <div className="w-full max-w-lg mx-auto p-8 bg-white/90 rounded-3xl shadow-2xl border border-slate-200 backdrop-blur-sm">
+        <div
+            className="w-full max-w-lg mx-auto p-8 rounded-3xl shadow-2xl border backdrop-blur-sm"
+            style={{
+                background: "var(--color-card)",
+                borderColor: "var(--color-border)",
+                color: "var(--color-text)"
+            }}
+        >
             <form onSubmit={handleSubmit} className="space-y-7">
                 <div>
-                    <label htmlFor="file-input" className="block mb-2 font-semibold text-slate-700">画像ファイル</label>
+                    <label htmlFor="file-input" className="block mb-2 font-semibold"
+                        style={{ color: "var(--color-text)" }}>画像ファイル</label>
                     <input
                         id="file-input"
                         type="file"
                         accept="image/*"
                         onChange={handleFileChange}
-                        className="block w-full border border-slate-300 rounded-xl shadow-sm px-4 py-2 text-base bg-slate-50 focus:outline-none focus:ring-2 focus:ring-blue-400 transition"
+                        className="block w-full border rounded-xl shadow-sm px-4 py-2 text-base bg-slate-50 focus:outline-none focus:ring-2 focus:ring-blue-400 transition"
+                        style={{
+                            borderColor: "var(--color-border)",
+                            background: "var(--color-bg-secondary)",
+                            color: "var(--color-text)"
+                        }}
                     />
                 </div>
                 <div>
-                    <label htmlFor="style-select" className="block mb-2 font-semibold text-slate-700">スタイル</label>
+                    <label htmlFor="style-select" className="block mb-2 font-semibold"
+                        style={{ color: "var(--color-text)" }}>スタイル</label>
                     <select
                         id="style-select"
                         value={style}
                         onChange={handleStyleChange}
-                        className="w-full border border-slate-300 rounded-xl p-2.5 shadow-sm bg-slate-50 focus:outline-none focus:ring-2 focus:ring-blue-400 transition"
+                        className="w-full border rounded-xl p-2.5 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400 transition"
+                        style={{
+                            borderColor: "var(--color-border)",
+                            background: "var(--color-bg-secondary)",
+                            color: "var(--color-text)"
+                        }}
                     >
                         <option value="anime">アニメ風</option>
                         <option value="cartoon">カートゥーン風</option>
@@ -122,14 +141,18 @@ export default function GenerateIllustration() {
                             onChange={handleRemoveBgChange}
                             className="mr-2 accent-blue-600 size-5"
                         />
-                        <span className="text-slate-700">背景を除去してからアイコン化する</span>
+                        <span style={{ color: "var(--color-text)" }}>背景を除去してからアイコン化する</span>
                     </label>
                 </div>
                 <div className="flex gap-4 pt-2">
                     <button
                         type="submit"
                         disabled={loading}
-                        className="flex-1 bg-gradient-to-r from-blue-500 to-indigo-500 text-white py-2.5 rounded-xl shadow-lg font-bold hover:from-blue-600 hover:to-indigo-600 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="flex-1 py-2.5 rounded-xl shadow-lg font-bold transition disabled:opacity-50 disabled:cursor-not-allowed"
+                        style={{
+                            background: "linear-gradient(to right, var(--color-accent), #6366f1)",
+                            color: "#fff"
+                        }}
                     >
                         {loading ? "生成中..." : "アイコン生成"}
                     </button>
@@ -137,36 +160,54 @@ export default function GenerateIllustration() {
                         type="button"
                         disabled={loading || !file}
                         onClick={handleRemoveBgOnly}
-                        className="flex-1 bg-gradient-to-r from-green-500 to-emerald-500 text-white py-2.5 rounded-xl shadow-lg font-bold hover:from-green-600 hover:to-emerald-600 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="flex-1 py-2.5 rounded-xl shadow-lg font-bold transition disabled:opacity-50 disabled:cursor-not-allowed"
+                        style={{
+                            background: "linear-gradient(to right, var(--color-success), #34d399)",
+                            color: "#fff"
+                        }}
                     >
                         {loading ? "処理中..." : "背景除去のみ"}
                     </button>
                 </div>
             </form>
             {error && (
-                <div className="mt-7 text-red-600 font-semibold text-center border border-red-200 bg-red-50 rounded-xl p-3 shadow">
+                <div className="mt-7 font-semibold text-center border rounded-xl p-3 shadow"
+                    style={{
+                        color: "var(--color-error)",
+                        borderColor: "var(--color-error)",
+                        background: "rgba(239,68,68,0.08)"
+                    }}>
                     {error}
                 </div>
             )}
             {bgRemovedImage && (
-                <div className="mt-10 border-t pt-7">
-                    <div className="font-bold mb-3 text-slate-700 text-center">背景除去結果プレビュー</div>
+                <div className="mt-10 border-t pt-7" style={{ borderColor: "var(--color-border)" }}>
+                    <div className="font-bold mb-3 text-center" style={{ color: "var(--color-text)" }}>背景除去結果プレビュー</div>
                     <img
                         src={bgRemovedImage}
                         alt="背景除去画像"
-                        className="mx-auto border-2 border-green-300 bg-white rounded-2xl shadow-lg max-w-xs max-h-xs aspect-square object-contain"
-                        style={{maxWidth: "256px", maxHeight: "256px"}}
+                        className="mx-auto border-2 rounded-2xl shadow-lg max-w-xs max-h-xs aspect-square object-contain"
+                        style={{
+                            maxWidth: "256px",
+                            maxHeight: "256px",
+                            borderColor: "var(--color-success)",
+                            background: "var(--color-card)"
+                        }}
                     />
                 </div>
             )}
             {imageUrl && (
-                <div className="mt-10 border-t pt-7">
-                    <div className="font-bold mb-3 text-slate-700 text-center">生成アイコン</div>
+                <div className="mt-10 border-t pt-7" style={{ borderColor: "var(--color-border)" }}>
+                    <div className="font-bold mb-3 text-center" style={{ color: "var(--color-text)" }}>生成アイコン</div>
                     <img
                         src={imageUrl}
                         alt="生成アイコン"
-                        className="mx-auto border-2 border-blue-300 rounded-2xl shadow-lg max-w-xs max-h-xs aspect-square object-contain"
-                        style={{maxWidth: "256px", maxHeight: "256px"}}
+                        className="mx-auto border-2 rounded-2xl shadow-lg max-w-xs max-h-xs aspect-square object-contain"
+                        style={{
+                            maxWidth: "256px",
+                            maxHeight: "256px",
+                            borderColor: "var(--color-accent)"
+                        }}
                     />
                 </div>
             )}

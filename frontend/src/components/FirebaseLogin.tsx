@@ -34,8 +34,17 @@ export const FirebaseLogin: React.FC = () => {
 
   if (user) {
     return (
-      <div className="max-w-sm mx-auto mt-16 p-6 border border-gray-200 rounded-lg bg-white shadow text-center">
-        <div className="mb-2 text-gray-700">ログイン済み: {user.email}</div>
+      <div
+        className="max-w-sm mx-auto mt-16 p-6 border rounded-lg shadow text-center"
+        style={{
+          background: "var(--color-card)",
+          borderColor: "var(--color-border)",
+          color: "var(--color-text)"
+        }}
+      >
+        <div className="mb-2" style={{ color: "var(--color-text)" }}>
+          ログイン済み: {user.email}
+        </div>
       </div>
     );
   }
@@ -43,9 +52,15 @@ export const FirebaseLogin: React.FC = () => {
   return (
     <form
       onSubmit={isSigningUp ? handleSignup : handleLogin}
-      className="max-w-sm w-full mx-auto mt-16 p-8 border border-gray-200 rounded-lg bg-white shadow"
+      className="max-w-sm w-full mx-auto mt-16 p-8 border rounded-lg shadow"
+      style={{
+        background: "var(--color-card)",
+        borderColor: "var(--color-border)",
+        color: "var(--color-text)"
+      }}
     >
-      <h2 className="text-2xl font-bold mb-6 text-blue-700 text-center tracking-tight">
+      <h2 className="text-2xl font-bold mb-6 text-center tracking-tight"
+        style={{ color: "var(--color-accent)" }}>
         {isSigningUp ? "サインアップ" : "ログイン"}
       </h2>
       <div className="mb-4">
@@ -54,8 +69,13 @@ export const FirebaseLogin: React.FC = () => {
           placeholder="メールアドレス"
           value={email}
           onChange={e => setEmail(e.target.value)}
-          className="block w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-300 transition"
+          className="block w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-300 transition"
           required
+          style={{
+            borderColor: "var(--color-border)",
+            background: "var(--color-bg-secondary)",
+            color: "var(--color-text)"
+          }}
         />
       </div>
       <div className="mb-4">
@@ -64,20 +84,34 @@ export const FirebaseLogin: React.FC = () => {
           placeholder="パスワード"
           value={password}
           onChange={e => setPassword(e.target.value)}
-          className="block w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-300 transition"
+          className="block w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-300 transition"
           required
+          style={{
+            borderColor: "var(--color-border)",
+            background: "var(--color-bg-secondary)",
+            color: "var(--color-text)"
+          }}
         />
       </div>
-      {error && <div className="text-red-500 mb-4 text-sm text-center">{error}</div>}
+      {error && <div className="mb-4 text-sm text-center" style={{ color: "var(--color-error)" }}>{error}</div>}
       <button
         type="submit"
-        className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 rounded transition mb-3"
+        className="w-full font-semibold py-2 rounded transition mb-3"
+        style={{
+          background: "var(--color-accent)",
+          color: "#fff"
+        }}
       >
         {isSigningUp ? "サインアップ" : "ログイン"}
       </button>
       <button
         type="button"
-        className="w-full bg-gray-100 hover:bg-gray-200 text-blue-700 font-semibold py-2 rounded transition border border-gray-300"
+        className="w-full font-semibold py-2 rounded transition border"
+        style={{
+          background: "var(--color-bg-secondary)",
+          color: "var(--color-accent)",
+          borderColor: "var(--color-border)"
+        }}
         onClick={() => {
           setIsSigningUp(!isSigningUp);
           setError(null);

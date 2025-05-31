@@ -1,1 +1,31 @@
 @import "tailwindcss";
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* === カラーカスタムプロパティ定義 === */
+:root {
+  --color-bg: #f8fafc; /* slate-100 */
+  --color-bg-secondary: #eff6ff; /* blue-50 */
+  --color-text: #1e293b; /* slate-800 */
+  --color-card: #fff;
+  --color-border: #e2e8f0; /* slate-200 */
+  --color-accent: #2563eb; /* blue-600 */
+  --color-error: #ef4444; /* red-500 */
+  --color-success: #22c55e; /* green-500 */
+}
+
+.dark {
+  --color-bg: #0f172a; /* slate-900 */
+  --color-bg-secondary: #1e293b; /* slate-800 */
+  --color-text: #f1f5f9; /* slate-100 */
+  --color-card: #1e293b; /* slate-800 */
+  --color-border: #334155; /* slate-700 */
+  --color-accent: #60a5fa; /* blue-400 */
+  --color-error: #f87171; /* red-400 */
+  --color-success: #4ade80; /* green-400 */
+}
+
+/* 既存のTailwindクラスを上書きする場合は、必要に応じて下記のようにカスタムプロパティを利用 */
+body, html {
+  background: var(--color-bg);
+  color: var(--color-text);
+}

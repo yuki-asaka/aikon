@@ -34,7 +34,7 @@ export default function App() {
             ) : (
                 <>
                     <h1 className="text-3xl sm:text-4xl font-extrabold text-center mt-10 mb-6 text-blue-700 tracking-tight drop-shadow">
-                        AIイラスト生成
+                        aikon
                     </h1>
                     <GenerateIllustration />
                 </>
@@ -45,3 +45,4 @@ export default function App() {
         </div>
     );
 }
+

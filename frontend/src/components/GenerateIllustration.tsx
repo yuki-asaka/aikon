@@ -122,7 +122,7 @@ export default function GenerateIllustration() {
                             onChange={handleRemoveBgChange}
                             className="mr-2 accent-blue-600 size-5"
                         />
-                        <span className="text-slate-700">背景を除去してからイラスト化する</span>
+                        <span className="text-slate-700">背景を除去してからアイコン化する</span>
                     </label>
                 </div>
                 <div className="flex gap-4 pt-2">
@@ -131,7 +131,7 @@ export default function GenerateIllustration() {
                         disabled={loading}
                         className="flex-1 bg-gradient-to-r from-blue-500 to-indigo-500 text-white py-2.5 rounded-xl shadow-lg font-bold hover:from-blue-600 hover:to-indigo-600 transition disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                        {loading ? "生成中..." : "イラスト生成"}
+                        {loading ? "生成中..." : "アイコン生成"}
                     </button>
                     <button
                         type="button"
@@ -161,10 +161,10 @@ export default function GenerateIllustration() {
             )}
             {imageUrl && (
                 <div className="mt-10 border-t pt-7">
-                    <div className="font-bold mb-3 text-slate-700 text-center">生成イラスト</div>
+                    <div className="font-bold mb-3 text-slate-700 text-center">生成アイコン</div>
                     <img
                         src={imageUrl}
-                        alt="生成イラスト"
+                        alt="生成アイコン"
                         className="mx-auto border-2 border-blue-300 rounded-2xl shadow-lg max-w-xs max-h-xs aspect-square object-contain"
                         style={{maxWidth: "256px", maxHeight: "256px"}}
                     />

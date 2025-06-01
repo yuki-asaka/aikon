@@ -16,7 +16,6 @@ services:
       retries: 3
     environment:
       - PYTHONPATH=/opt/project/backend
-      - PORT=8000
 
   frontend:
     image: node:22

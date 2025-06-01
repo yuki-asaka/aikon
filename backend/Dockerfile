@@ -45,5 +45,4 @@ RUN useradd -r -u 1000 appuser \
 
 USER appuser
 
-# python経由でuvicornを実行しローダ問題を回避
-CMD ["/bin/sh", "-c", "python -m uvicorn app.main:app --host 0.0.0.0 --port ${PORT} --reload"]
+CMD ["python", "-m", "uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]

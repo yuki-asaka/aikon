@@ -11,10 +11,11 @@ from PIL import Image
 app = FastAPI()
 
 frontend_origin = os.getenv("FRONTEND_ORIGIN", "http://localhost:3000")
+origins = [origin.strip() for origin in frontend_origin.split(",") if origin.strip()]
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[frontend_origin],
+    allow_origins=origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

@@ -45,4 +45,4 @@ RUN useradd -r -u 1000 appuser \
 
 USER appuser
 
-CMD ["python", "-m", "uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["python", "-m", "uvicorn", "app.main:app", "--worker", "2",  "--host", "0.0.0.0", "--port", "8000"]

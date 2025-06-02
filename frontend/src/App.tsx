@@ -37,7 +37,7 @@ export default function App() {
             {!user ? (<FirebaseLogin/>) : (<>
                     <h1 className="text-3xl sm:text-4xl font-extrabold text-center mt-10 mb-6 tracking-tight drop-shadow"
                         style={{ color: "var(--color-accent)" }}>
-                        <img src="/logo.svg" alt="Aikon Logo" className="inline-block h-10 mr-2"/>
+                        <img src="./logo.svg" alt="Aikon Logo" className="inline-block h-10 mr-2"/>
                     </h1>
                     <GenerateIllustration/>
                 </>)}

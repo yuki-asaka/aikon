@@ -60,7 +60,7 @@ docker-compose up --build
 ## 6. 開発用ホットリロード
 
 - フロントエンド: `frontend/src` ディレクトリでコードを編集すると自動でリロードされます（`npm run dev`）。
-- バックエンド: `backend/app` ディレクトリでコードを編集すると自動でリロードされます（`--reload` オプション）。
+- バックエンド: `dev` サービス（`dev.Dockerfile`利用）をIDEのPython interpreterに設定すると、ホットリロードやデバッグが容易です。
 
 ---
 
@@ -83,13 +83,15 @@ docker-compose up --build
 
 ### バックエンド
 
-- テスト実行（pytest）:
+- テスト・Linterまとめて実行:
   ```sh
-  docker-compose exec backend poetry run pytest
+  docker compose run --rm test
   ```
-- Linter実行（ruff）:
+  （`ruff check && black --check . && pytest tests` を実行します）
+- 依存関係の追加・削除:
   ```sh
-  docker-compose exec backend poetry run ruff app/
+  docker compose run --rm uv add <パッケージ名>
+  docker compose run --rm uv remove <パッケージ名>
   ```
 
 ### フロントエンド
@@ -107,7 +109,8 @@ docker-compose up --build
 
 ## 10. バックエンドAPIの起動・確認
 
-- バックエンドは `python -m uvicorn app.main:app --host 0.0.0.0 --port 8000` で起動
+- 開発時は `dev` サービスを利用（`dev.Dockerfile`ベース、IDE連携やホットリロード推奨）
+- 本番相当の動作確認は `backend` サービス（`Dockerfile`ベース）で実施
 - `/health` エンドポイントで稼働確認
 - 主要API:
     - `POST /upload` : 画像アップロード
@@ -145,7 +148,7 @@ curl http://localhost:8000/result/yyyy --output result.png
 ### バックエンド（Render）
 
 - `backend/` ディレクトリは [Render](https://render.com/) に連携し、GitHubリポジトリへのpushで自動デプロイされます。
-- RenderのWeb Serviceとして新規作成し、`build command` や `start command` は通常通り（例: `poetry install` / `python -m uvicorn app.main:app --host 0.0.0.0 --port 8000`）。
+- RenderのWeb Serviceとして新規作成し、`build command` や `start command` は通常通り（例: `uv sync` / `uv run fastapi run --host 0.0.0.0 --port 8000 --workers 2 /app/app/main.py`）。
 - 必要な環境変数（APIキーやFirebaseプロジェクト情報など）はRenderの「Environment」設定で追加してください。
 - デプロイ後、Renderの提供するURLでバックエンドAPIが公開されます。
 

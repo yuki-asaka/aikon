@@ -6,15 +6,16 @@
 |--------------|------------------------------------------------------|
 | フロントエンド | React 18.x, Tailwind CSS 3.x, Node.js 22.x, npm     |
 | バックエンド   | FastAPI 0.110.x, Python 3.12.x                      |
-| 依存管理      | Poetry 1.8.x（バックエンド）, npm（フロントエンド）   |
+| 依存管理      | uv（バックエンド）, npm（フロントエンド）            |
 | 推論エンジン   | Replicate API（Stable Diffusion, ControlNet, InstantID等） |
 | コンテナ      | Docker 24.x, docker-compose 2.x                      |
-| 開発環境      | PyCharm, Docker interpreter                          |
+| 開発環境      | PyCharm, Docker interpreter（dev.Dockerfile利用）    |
 | バックエンドテスト | pytest                                            |
 | バックエンドLinter | ruff                                            |
 | フロントエンドテスト | Jest                                           |
 | フロントエンドLinter | ESLint                                        |
 | 認証         | Firebase Authentication（Googleアカウント等）         |
+| デプロイ      | **GCP Cloud Storage（フロントエンド）, Cloud Run（バックエンド）** |
 
 ## フロントエンド構成
 
@@ -25,14 +26,37 @@
   - `public/`（HTMLテンプレート等）
   - `.env`（フロントエンド用環境変数）
 
+## フロントエンド実装補足
+
+- テスト: Jest によるユニットテスト
+- Linter: ESLint による静的解析
+- `npm test` でテスト実行、`npm run lint` でLinter実行
+
+## フロントエンドCD（継続的デリバリー）
+
+- **GitHub Actions などのCI/CDツールを利用し、`main`ブランチへのpush時に自動でビルド・デプロイを実施**
+    - `frontend/` ディレクトリで `npm run build` を実行し、`build/` 配下の静的ファイルを生成
+    - 生成された `build/` 配下のファイルを、GCP Cloud Storage バケットに自動アップロード
+    - アップロードには `gsutil rsync` や `google-github-actions/upload-cloud-storage` などの公式Actionを利用
+    - バケットは静的ウェブサイトホスティングを有効化し、公開設定・HTTPS配信はGCPの公式手順に従う
+    - 認証情報（サービスアカウントキー等）はGitHub Secretsで安全に管理
+
 ## バックエンド構成
 
 - ディレクトリ: `backend/`
 - 主要ファイル:  
   - `app/main.py`（FastAPIアプリ本体、/healthエンドポイント含む）
-  - `pyproject.toml`, `poetry.lock`（Poetry依存管理）
+  - `pyproject.toml`, `uv.lock`（uv依存管理）
   - `.env`（バックエンド用環境変数）
-  - `Dockerfile`（マルチステージビルド、Poetry仮想環境を/opt/venv配下に作成）
+  - `Dockerfile`（本番用: マルチステージビルド, uv仮想環境を/app/.venv配下に作成）
+  - `dev.Dockerfile`（開発用: ホットリロード・IDE連携向け）
+
+## バックエンド開発・運用のDocker構成
+
+- `dev` サービス: 開発用。`dev.Dockerfile`を利用し、IDEのPython interpreterとしても利用可能。ホットリロードやボリューム同期で快適な開発体験。
+- `backend` サービス: 本番用Dockerfileでビルドし、本番相当の動作確認用。
+- `test` サービス: Linter・テスト（ruff, black, pytest）をまとめて実行。`ruff check && black --check . && pytest tests` を直接実行。
+- `uv` サービス: uvコマンドで依存関係を変更・管理する用途。
 
 ## バックエンド実装補足
 
@@ -42,25 +66,26 @@
 - 画像ファイルは一時ディレクトリに保存し、IDで管理
 - `/health` エンドポイントで稼働確認
 
-## フロントエンド実装補足
-
-- テスト: Jest によるユニットテスト
-- Linter: ESLint による静的解析
-- `npm test` でテスト実行、`npm run lint` でLinter実行
-
 ## バックエンド実装補足（テスト・Linter）
 
 - テスト: pytest による自動テスト
 - Linter: ruff による静的解析
-- `poetry run pytest` でテスト実行、`poetry run ruff app/` でLinter実行
+- `docker compose run --rm test` でLinter・テストをまとめて実行（`ruff check && black --check . && pytest tests` を実行）
+- 依存管理の変更は `docker compose run --rm uv add <パッケージ名>` などで実施
 
-## Docker・開発運用
+## デプロイ・運用（GCP）
 
-- `docker-compose.yml` で backend, frontend サービスを管理
-  - 各サービスで `.env` ファイルを分離
-  - backendは `/health` エンドポイントでhealthcheck
-  - frontendは `npm run dev` でホットリロード
-- バックエンドの仮想環境は `/opt/venv` 配下に作成し、PATHを通して実行
-- 本番環境では `appuser` 権限で安全に実行
-- バックエンドは `python -m uvicorn app.main:app ...` 形式で起動しローダ問題を回避
+- **フロントエンドはビルド成果物（静的ファイル）をGCP Cloud Storageに配置し、静的ウェブサイトとして公開**
+    - `frontend/` ディレクトリで `npm run build` し、`build/` 配下をCloud Storageバケットにアップロード
+    - Cloud Storageの静的ウェブサイトホスティング機能を利用
+    - バケットのパブリック設定やHTTPS配信はGCPの公式手順に従う
+- **バックエンドはDockerイメージをCloud Runにデプロイ**
+    - `backend/` ディレクトリでDockerビルドし、Google Container Registry/Artifact Registryにpush
+    - Cloud Runサービスとしてデプロイし、HTTPSエンドポイントを公開
+    - 必要な環境変数はCloud Runのサービス設定で指定
+    - 認証やCORS設定に注意
 
+## ローカル開発
+
+- ローカルでは `docker-compose.yml` で backend, frontend サービスを管理
+- 本番はGCP（Cloud Storage/Cloud Run）で稼働

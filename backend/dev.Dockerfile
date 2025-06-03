@@ -1,25 +1,29 @@
-# with uv
-FROM ghcr.io/astral-sh/uv:python3.12-bookworm-slim AS builder
-ENV UV_COMPILE_BYTECODE=1 UV_LINK_MODE=copy
+FROM ghcr.io/astral-sh/uv:bookworm-slim AS builder
 
-# Disable Python downloads
-ENV UV_PYTHON_DOWNLOADS=0
+ENV UV_COMPILE_BYTECODE=1 UV_LINK_MODE=copy
+ENV UV_PYTHON_INSTALL_DIR=/python
+ENV UV_PYTHON_PREFERENCE=only-managed
+
+RUN uv python install 3.12
 
 WORKDIR /app
+
 RUN --mount=type=cache,target=/root/.cache/uv \
     --mount=type=bind,source=uv.lock,target=uv.lock \
     --mount=type=bind,source=pyproject.toml,target=pyproject.toml \
-    uv sync --locked --no-install-project --no-dev
+    uv sync
+
 COPY . /app
+
 RUN --mount=type=cache,target=/root/.cache/uv \
-    uv sync --locked --no-dev
+    uv sync --locked
 
 
-# without uv
-FROM python:3.12-slim-bookworm
+FROM debian:bookworm-slim
 
+COPY --from=builder --chown=python:python /python /python
 COPY --from=builder --chown=app:app /app /app
 
 ENV PATH="/app/.venv/bin:$PATH"
 
-CMD ["fastapi", "run", "--host", "0.0.0.0", "--port", "8000", "--workers", "2", "/app/app/main.py"]
+CMD ["fastapi", "dev", "--host", "0.0.0.0", "--port", "8000", "/app/app/main.py"]

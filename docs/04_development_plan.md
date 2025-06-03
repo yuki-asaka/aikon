@@ -34,6 +34,8 @@
 - FastAPI による主要API（/upload, /generate, /result, /health）を実装済み
 - Replicate API 連携によるアイコン生成処理を組み込み済み
 - 画像ファイルの一時保存・ID管理方式を採用
+- 依存管理はuvで実施（`docker compose run --rm uv add <パッケージ名>` などで管理）
+- Linter・テストは `docker compose run --rm test` で `ruff check && black --check . && pytest tests` をまとめて実行
 
 今後の拡張ポイント:
 - エラー処理・バリデーション強化
@@ -47,4 +49,3 @@
 - 要件定義（`docs/01_requirements.md`）に記載の機能を順次実装し、MVP完成後に追加要件を検討する。
 - モデル選定や背景除去はReplicate API等の外部サービスを活用予定。
 - 工数は目安であり、API仕様やモデル精度によって変動する可能性あり。
-

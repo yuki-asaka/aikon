@@ -1,4 +1,5 @@
 import base64
+import io
 import os
 
 import cv2
@@ -6,7 +7,8 @@ import numpy as np
 from fastapi import FastAPI, File, Form, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
-from PIL import Image
+from PIL import Image, ImageFilter
+from rembg import remove
 
 app = FastAPI()
 
@@ -35,16 +37,11 @@ async def upload_image(file: UploadFile = File(...)):
 
 
 async def remove_bg_with_rembg(image_bytes: bytes) -> bytes:
-    from rembg import remove
     result = remove(image_bytes)
     return result
 
 
 async def remove_bg_with_rembg_and_white_bg(image_bytes: bytes) -> bytes:
-    import io
-    from PIL import Image, ImageFilter
-    from rembg import remove
-
     fg = Image.open(io.BytesIO(remove(image_bytes))).convert("RGBA")
     alpha = fg.split()[3].filter(ImageFilter.GaussianBlur(radius=4))
     fg.putalpha(alpha)

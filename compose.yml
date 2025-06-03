@@ -1,0 +1,80 @@
+services:
+  # 本番用Dockerfileでの動作確認用
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - 8000:8000
+    env_file:
+      - ./backend/.env
+
+  # フロントエンド開発用
+  frontend:
+    image: node:22
+    working_dir: /app
+    volumes:
+      - ./frontend:/app
+    command: sh -c "npm install && npm run dev"
+    ports:
+      - "3000:3000"
+    environment:
+      - CHOKIDAR_USEPOLLING=true
+    env_file:
+      - ./frontend/.env
+
+  # uvコマンドで依存関係を変更・管理する用途
+  uv:
+    build:
+      context: ./backend
+    image: ghcr.io/astral-sh/uv:bookworm-slim
+    volumes:
+      - ./backend:/app
+      - ./backend/.venv:/app/.venv
+    tty: true
+    stdin_open: true
+    working_dir: /app
+    entrypoint:
+      - uv
+    command: run
+
+  # 開発用。dev.Dockerfileを利用し、IDEのPython interpreterとしても利用可能
+  dev:
+    build:
+      context: ./backend
+      dockerfile: dev.Dockerfile
+    develop:
+      # Create a `watch` configuration to update the app
+      watch:
+        # Sync the working directory with the `/app` directory in the container
+        - action: sync
+          path: ./backend
+          target: /app
+          # Exclude the project virtual environment
+          ignore:
+            - .venv/
+        # Rebuild the image on changes to the `pyproject.toml`
+        - action: rebuild
+          path: ./pyproject.toml
+    ports:
+      - 8000:8000
+    env_file:
+      - ./backend/.env
+    environment:
+      - PYTHONPATH=/opt/project/backend
+
+  # Linter・テストをまとめて実行
+  test:
+    build:
+      context: ./backend
+      dockerfile: dev.Dockerfile
+    develop:
+      watch:
+        - action: rebuild
+          path: ./pyproject.toml
+    working_dir: /app
+    env_file:
+      - ./backend/.env
+    environment:
+      - PYTHONPATH=/app/app
+    command: /bin/bash -c "ruff check && black --check . && pytest tests"

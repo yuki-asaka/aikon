@@ -19,7 +19,8 @@ jobs:
       - name: Build and Push Docker image
         uses: docker/build-push-action@v5
         with:
-          context: .
+          context: ./backend
+          file: ./backend/Dockerfile
           push: true
           tags: asia-northeast1-docker.pkg.dev/aikon-461600/cloud-run-source-deploy/aikon/aikon-backend:${{ github.sha }}
       - uses: google-github-actions/deploy-cloudrun@v2

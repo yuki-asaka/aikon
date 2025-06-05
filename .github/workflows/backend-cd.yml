@@ -45,7 +45,7 @@ jobs:
 
   comment-issues:
     needs: backend-deploy
-    if: needs.backend-deploy.outputs.issues != ''
+    if: needs.backend-deploy.outputs.issues != '' && needs.backend-deploy.outputs.issues != 'null'
     runs-on: ubuntu-latest
     strategy:
       matrix:

@@ -1,5 +1,4 @@
 name: Deploy Backend to Cloud Run
-
 on:
   push:
     tags:
@@ -7,6 +6,7 @@ on:
 
 jobs:
   backend-deploy:
+    if: startsWith(github.ref, 'refs/tags/v') && github.event.base_ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -19,5 +19,5 @@ jobs:
       - uses: google-github-actions/deploy-cloudrun@v2
         with:
           service: aikon-backend
-          image: asia-northeast1-docker.pkg.dev/aikon-461600/cloud-run-source-deploy/aikon-backend:${{ github.sha }}
+          image: asia-northeast1-docker.pkg.dev/aikon-461600/cloud-run-source-deploy/aikon/aikon-backend:${{ github.sha }}
           region: asia-northeast1

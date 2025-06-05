@@ -40,14 +40,18 @@ jobs:
         run: |
           echo "ISSUES=$(echo '${{ github.event.pull_request.body }}' | grep -oE '#[0-9]+' | tr -d '#' | tr '\n' ',' | sed 's/,$//')" >> $GITHUB_OUTPUT
 
-      - name: Create or update comment on issues
-        if: success() && steps.extract-issues.outputs.ISSUES != ''
-        uses: peter-evans/create-or-update-comment@v4
+  comment-issues:
+    needs: backend-deploy
+    if: needs.backend-deploy.outputs.issues != ''
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        issue: [${{ needs.backend-deploy.outputs.issues }}]
+
+    steps:
+      - uses: peter-evans/create-or-update-comment@v4
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           issue-number: ${{ matrix.issue }}
           body: |
             :rocket: Backend has been successfully deployed to Cloud Run!（${{ github.ref }}）
-        strategy:
-          matrix:
-            issue: [${{ steps.extract-issues.outputs.ISSUES }}]

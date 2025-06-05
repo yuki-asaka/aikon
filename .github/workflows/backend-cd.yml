@@ -47,14 +47,38 @@ jobs:
     needs: backend-deploy
     if: needs.backend-deploy.outputs.issues != '' && needs.backend-deploy.outputs.issues != 'null'
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        issue: ${{ fromJson(needs.backend-deploy.outputs.issues) }}
-
     steps:
-      - uses: peter-evans/create-or-update-comment@v4
+      - name: Comment on issues
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ISSUES: ${{ needs.backend-deploy.outputs.issues }}
+          REF: ${{ github.ref }}
+        run: |
+          for issue in $(echo "$ISSUES" | jq '.[]'); do
+            gh issue comment "$issue" --body ":rocket: Backend has been successfully deployed to Cloud Run!（$REF）"
+          done
+        shell: bash
+
+  build_and_release:
+    needs: backend-deploy
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          issue-number: ${{ matrix.issue }}
-          body: |
-            :rocket: Backend has been successfully deployed to Cloud Run!（${{ github.ref }}）
+          fetch-depth: 0
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build
+
+      - name: Archive Production Build
+        run: |
+          tar -czf ${{github.ref_name}}.tar.gz ./dist
+
+      - name: Create Release
+        run: |
+          gh release create ${{github.ref_name}} --generate-notes ${{github.ref_name}}.tar.gz
+        env:
+          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}

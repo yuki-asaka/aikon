@@ -22,7 +22,6 @@ jobs:
 
       - name: Install Commitizen
         run: pip install commitizen
-        working-directory: backend
 
       - name: Bump version and generate changelog
         id: cz
@@ -54,7 +53,7 @@ jobs:
         working-directory: backend
 
       - name: Create GitHub Release
-        if: env.NO_BUMP == '0' && hashFiles('backend/CHANGELOG.md') != ''
+        if: env.NO_BUMP == '0' && hashFiles('CHANGELOG.md') != ''
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |

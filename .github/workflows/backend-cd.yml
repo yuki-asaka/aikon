@@ -20,8 +20,19 @@ jobs:
         with:
           python-version: '3.x'
 
+      - name: Show working directory before Commitizen install
+        run: |
+          pwd
+          ls -l
+
       - name: Install Commitizen
         run: pip install commitizen
+
+      - name: Show working directory before cz bump
+        run: |
+          pwd
+          ls -l
+        working-directory: backend
 
       - name: Bump version and generate changelog
         id: cz
@@ -30,34 +41,55 @@ jobs:
           cz bump --changelog --yes
           CZ_EXIT_CODE=$?
           set -e
-          if [ $CZ_EXIT_CODE -eq 4 ]; then
-            # バージョンアップ対象がない場合は現状バージョンを取得
+          if [ $CZ_EXIT_CODE -eq 4; then
+            echo "No changes to commit, skipping version bump."
             VERSION=$(cz version --project)
-          elif [ $CZ_EXIT_CODE -eq 0 ]; then
+            echo "NO_BUMP=1" >> $GITHUB_ENV
+          elif [ $CZ_EXIT_CODE -eq 0; then
             VERSION=$(cz version --project)
+            echo "NO_BUMP=0" >> $GITHUB_ENV
           else
             exit $CZ_EXIT_CODE
           fi
           echo "version=$VERSION" >> $GITHUB_OUTPUT
+        working-directory: backend
+
+      - name: Show working directory before push
+        if: env.NO_BUMP == '0'
+        run: |
+          pwd
+          ls -l
+        working-directory: backend
 
       - name: Push changes and tags
+        if: env.NO_BUMP == '0'
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git push origin HEAD:main
           git push origin --tags
+        working-directory: backend
+
+      - name: Show working directory before release
+        if: env.NO_BUMP == '0' && hashFiles('CHANGELOG.md') != ''
+        run: |
+          pwd
+          ls -l
+        working-directory: backend
 
       - name: Create GitHub Release
+        if: env.NO_BUMP == '0' && hashFiles('CHANGELOG.md') != ''
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          TAG="v$(cz version --project)"
+          TAG="v${{ steps.cz.outputs.version }}"
           REPO_NAME=$(basename "$GITHUB_REPOSITORY")
-          TITLE="$REPO_NAME $(cz version --project)"
+          TITLE="$REPO_NAME ${{ steps.cz.outputs.version }}"
           gh release create "$TAG" \
             --repo="$GITHUB_REPOSITORY" \
             --title="$TITLE" \
             --notes-file=CHANGELOG.md
+        working-directory: backend
 
   backend-deploy:
     needs: version-and-release
@@ -68,12 +100,27 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Show working directory before GCP auth
+        run: |
+          pwd
+          ls -l
+
       - uses: google-github-actions/auth@v2
         with:
           credentials_json: ${{ secrets.GCP_SA_KEY }}
 
+      - name: Show working directory before docker config
+        run: |
+          pwd
+          ls -l
+
       - name: Configure docker for Artifact Registry
         run: gcloud auth configure-docker asia-northeast1-docker.pkg.dev
+
+      - name: Show working directory before build & push
+        run: |
+          pwd
+          ls -l
 
       - name: Build and Push Docker image
         uses: docker/build-push-action@v5
@@ -83,11 +130,21 @@ jobs:
           push: true
           tags: asia-northeast1-docker.pkg.dev/aikon-461600/cloud-run-source-deploy/aikon/aikon-backend:${{ github.sha }}
 
+      - name: Show working directory before deploy-cloudrun
+        run: |
+          pwd
+          ls -l
+
       - uses: google-github-actions/deploy-cloudrun@v2
         with:
           service: aikon-backend
           image: asia-northeast1-docker.pkg.dev/aikon-461600/cloud-run-source-deploy/aikon/aikon-backend:${{ github.sha }}
           region: asia-northeast1
+
+      - name: Show working directory before extract-issues
+        run: |
+          pwd
+          ls -l
 
       - name: Extract issues from PR body
         id: extract-issues

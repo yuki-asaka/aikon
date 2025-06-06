@@ -67,6 +67,7 @@ jobs:
         env:
           TAG: ${{ github.ref_name }}
           REPO: ${{ github.repository }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           TITLE="${REPO#*/} ${TAG#v}"
           gh release create "$TAG" \

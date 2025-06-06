@@ -26,8 +26,19 @@ jobs:
       - name: Bump version and generate changelog
         id: cz
         run: |
+          set +e
           cz bump --changelog --yes
-          echo "version=$(cz version --project)" >> $GITHUB_OUTPUT
+          CZ_EXIT_CODE=$?
+          set -e
+          if [ $CZ_EXIT_CODE -eq 4 ]; then
+            # バージョンアップ対象がない場合は現状バージョンを取得
+            VERSION=$(cz version --project)
+          elif [ $CZ_EXIT_CODE -eq 0 ]; then
+            VERSION=$(cz version --project)
+          else
+            exit $CZ_EXIT_CODE
+          fi
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
 
       - name: Push changes and tags
         run: |

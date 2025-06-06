@@ -1,9 +1,9 @@
 [project]
 name = "aikon-backend"
 version = "0.1.0"
-description = "Aikon FastAPI backend"
+description = "aikon FastAPI backend"
 authors = [
-    { name = "Your Name", email = "your.email@example.com" }
+    { name = "Yuki ASAKA", email = "your.email@example.com" }
 ]
 requires-python = ">=3.12,<3.14"
 dependencies = [
@@ -35,3 +35,11 @@ target-version = "py312"
 [tool.ruff.lint]
 select = ["E", "F", "W", "I"]
 ignore = []
+
+[tool.commitizen]
+name = "cz_conventional_commits"
+version = "0.1.0"
+version_files = [
+  "backend/pyproject.toml:version"
+]
+tag_format = "v$version"

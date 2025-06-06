@@ -1,18 +1,58 @@
 name: Deploy Backend to Cloud Run
 on:
   push:
-    tags:
-      - 'v*'
+    branches:
+      - main
+  workflow_dispatch:
 
 jobs:
+  version-and-release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    outputs:
+      new_tag: ${{ steps.cz.outputs.version }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: Install Commitizen
+        run: pip install commitizen
+
+      - name: Bump version and generate changelog
+        id: cz
+        run: |
+          cz bump --changelog --yes
+          echo "version=$(cz version --project)" >> $GITHUB_OUTPUT
+
+      - name: Push changes and tags
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git push origin HEAD:main
+          git push origin --tags
+
+      - name: Create GitHub Release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          TAG="v$(cz version --project)"
+          TITLE="${{ github.repository#*/ }} $(cz version --project)"
+          gh release create "$TAG" \
+            --repo="${{ github.repository }}" \
+            --title="$TITLE" \
+            --notes-file=CHANGELOG.md
+
   backend-deploy:
-    if: startsWith(github.ref, 'refs/tags/v') && github.event.base_ref == 'refs/heads/main'
+    needs: version-and-release
     runs-on: ubuntu-latest
     defaults:
       run:
         working-directory: backend
-    outputs:
-      issues: ${{ steps.extract-issues.outputs.ISSUES }}
     steps:
       - uses: actions/checkout@v4
 
@@ -44,35 +84,17 @@ jobs:
           echo "ISSUES=$ISSUES" >> $GITHUB_OUTPUT
 
   comment-issues:
-    needs: backend-deploy
-    if: needs.backend-deploy.outputs.issues != '' && needs.backend-deploy.outputs.issues != 'null'
+    needs: [backend-deploy]
+    if: needs.backend-deploy.outputs.ISSUES != '' && needs.backend-deploy.outputs.ISSUES != 'null'
     runs-on: ubuntu-latest
     steps:
       - name: Comment on issues
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          ISSUES: ${{ needs.backend-deploy.outputs.issues }}
-          REF: ${{ github.ref }}
+          ISSUES: ${{ needs.backend-deploy.outputs.ISSUES }}
+          REF: ${{ needs.version-and-release.outputs.new_tag }}
         run: |
           for issue in $(echo "$ISSUES" | jq '.[]'); do
             gh issue comment "$issue" --body ":rocket: Backend has been successfully deployed to Cloud Run!（$REF）"
           done
         shell: bash
-
-  release:
-    needs: backend-deploy
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-    steps:
-      - name: Create Release
-        env:
-          TAG: ${{ github.ref_name }}
-          REPO: ${{ github.repository }}
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          TITLE="${REPO#*/} ${TAG#v}"
-          gh release create "$TAG" \
-            --repo="$REPO" \
-            --title="$TITLE" \
-            --generate-notes

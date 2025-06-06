@@ -41,7 +41,7 @@ jobs:
           cz bump --changelog --yes
           CZ_EXIT_CODE=$?
           set -e
-          if [ $CZ_EXIT_CODE -eq 4 ]; then
+          if [ $CZ_EXIT_CODE -eq 4 ] || [ $CZ_EXIT_CODE -eq 21 ]; then
             echo "No changes to commit, skipping version bump."
             VERSION=$(cz version --project)
             echo "NO_BUMP=1" >> $GITHUB_ENV

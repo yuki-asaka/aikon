@@ -31,16 +31,19 @@ jobs:
           CZ_EXIT_CODE=$?
           set -e
           if [ $CZ_EXIT_CODE -eq 4 ]; then
-            # バージョンアップ対象がない場合は現状バージョンを取得
+            echo "No changes to commit, skipping version bump."
             VERSION=$(cz version --project)
+            echo "NO_BUMP=1" >> $GITHUB_ENV
           elif [ $CZ_EXIT_CODE -eq 0 ]; then
             VERSION=$(cz version --project)
+            echo "NO_BUMP=0" >> $GITHUB_ENV
           else
             exit $CZ_EXIT_CODE
           fi
           echo "version=$VERSION" >> $GITHUB_OUTPUT
 
       - name: Push changes and tags
+        if: env.NO_BUMP == '0'
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
@@ -48,12 +51,13 @@ jobs:
           git push origin --tags
 
       - name: Create GitHub Release
+        if: env.NO_BUMP == '0' && hashFiles('CHANGELOG.md') != ''
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          TAG="v$(cz version --project)"
+          TAG="v${{ steps.cz.outputs.version }}"
           REPO_NAME=$(basename "$GITHUB_REPOSITORY")
-          TITLE="$REPO_NAME $(cz version --project)"
+          TITLE="$REPO_NAME ${{ steps.cz.outputs.version }}"
           gh release create "$TAG" \
             --repo="$GITHUB_REPOSITORY" \
             --title="$TITLE" \

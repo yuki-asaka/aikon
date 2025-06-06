@@ -62,10 +62,10 @@ jobs:
   release:
     needs: backend-deploy
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - name: Create Release
-        permissions:
-          contents: write
         env:
           TAG: ${{ github.ref_name }}
           REPO: ${{ github.repository }}

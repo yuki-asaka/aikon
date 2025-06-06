@@ -59,24 +59,10 @@ jobs:
           done
         shell: bash
 
-  build_and_release:
+  release:
     needs: backend-deploy
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-      - uses: pnpm/action-setup@v4
-        with:
-          version: 9
-
-      - run: pnpm install --frozen-lockfile
-      - run: pnpm build
-
-      - name: Archive Production Build
-        run: |
-          tar -czf ${{github.ref_name}}.tar.gz ./dist
-
       - name: Create Release
         run: |
           gh release create "$tag" \

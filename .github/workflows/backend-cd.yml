@@ -41,9 +41,10 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           TAG="v$(cz version --project)"
-          TITLE="${{ github.repository#*/ }} $(cz version --project)"
+          REPO_NAME=$(basename "$GITHUB_REPOSITORY")
+          TITLE="$REPO_NAME $(cz version --project)"
           gh release create "$TAG" \
-            --repo="${{ github.repository }}" \
+            --repo="$GITHUB_REPOSITORY" \
             --title="$TITLE" \
             --notes-file=CHANGELOG.md
 

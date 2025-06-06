@@ -64,8 +64,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Create Release
+        env:
+          TAG: ${{ github.ref_name }}
+          REPO: ${{ github.repository }}
         run: |
-          gh release create "$tag" \
-              --repo="$GITHUB_REPOSITORY" \
-              --title="${GITHUB_REPOSITORY#*/} ${github.ref_name#v}" \
-              --generate-notes
+          TITLE="${REPO#*/} ${TAG#v}"
+          gh release create "$TAG" \
+            --repo="$REPO" \
+            --title="$TITLE" \
+            --generate-notes

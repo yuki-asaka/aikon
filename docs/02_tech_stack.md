@@ -2,20 +2,20 @@
 
 ## 技術スタック
 
-| 領域         | 技術・バージョン                                      |
-|--------------|------------------------------------------------------|
-| フロントエンド | React 18.x, Tailwind CSS 3.x, Node.js 22.x, npm     |
-| バックエンド   | FastAPI 0.110.x, Python 3.12.x                      |
-| 依存管理      | uv（バックエンド）, npm（フロントエンド）            |
+| 領域         | 技術・バージョン                                                |
+|--------------|---------------------------------------------------------|
+| フロントエンド | React 18.x, Tailwind CSS 4.x, Node.js 22.x, npm         |
+| バックエンド   | FastAPI 0.110.x, Python 3.12.x                          |
+| 依存管理      | uv（バックエンド）, npm（フロントエンド）                                |
 | 推論エンジン   | Replicate API（Stable Diffusion, ControlNet, InstantID等） |
-| コンテナ      | Docker 24.x, docker-compose 2.x                      |
-| 開発環境      | PyCharm, Docker interpreter（dev.Dockerfile利用）    |
-| バックエンドテスト | pytest                                            |
-| バックエンドLinter | ruff                                            |
-| フロントエンドテスト | Jest                                           |
-| フロントエンドLinter | ESLint                                        |
-| 認証         | Firebase Authentication（Googleアカウント等）         |
-| デプロイ      | **GCP Cloud Storage（フロントエンド）, Cloud Run（バックエンド）** |
+| コンテナ      | Docker 24.x, docker-compose 2.x                         |
+| 開発環境      | PyCharm, Docker interpreter（dev.Dockerfile利用）           |
+| バックエンドテスト | pytest                                                  |
+| バックエンドLinter | ruff                                                    |
+| フロントエンドテスト | Jest                                                    |
+| フロントエンドLinter | ESLint                                                  |
+| 認証         | Firebase Authentication（Googleアカウント等）                   |
+| デプロイ      | **GCP Cloud Storage（フロントエンド）, Cloud Run（バックエンド）**       |
 
 ## フロントエンド構成
 

@@ -29,15 +29,15 @@ jobs:
       - name: Bump version and generate changelog
         id: cz
         run: |
-          cz bump --changelog --yes --config cz.toml
+          cz bump --changelog --yes
           CZ_EXIT_CODE=$?
           set -e
           if [ $CZ_EXIT_CODE -eq 4 ] || [ $CZ_EXIT_CODE -eq 21 ]; then
             echo "No changes to commit, skipping version bump."
-            VERSION=$(cz version --project --config cz.toml)
+            VERSION=$(cz version --project)
             echo "NO_BUMP=1" >> $GITHUB_ENV
           elif [ $CZ_EXIT_CODE -eq 0 ]; then
-            VERSION=$(cz version --project --config cz.toml)
+            VERSION=$(cz version --project)
             echo "NO_BUMP=0" >> $GITHUB_ENV
           else
             exit $CZ_EXIT_CODE

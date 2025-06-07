@@ -77,12 +77,11 @@ jobs:
     if: needs.version-and-release.outputs.version != ''
     steps:
       - name: Trigger backend-cd workflow
-        uses: peter-evans/workflow-dispatch@v3
+        uses: peter-evans/repository-dispatch@v3
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           repository: ${{ github.repository }}
-          workflow: backend-cd.yml
-          ref: main
+          event-type: backend-cd
 
   trigger-frontend-cd:
     needs: version-and-release
@@ -90,9 +89,8 @@ jobs:
     if: needs.version-and-release.outputs.version != ''
     steps:
       - name: Trigger frontend-cd workflow
-        uses: peter-evans/workflow-dispatch@v3
+        uses: peter-evans/repository-dispatch@v3
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           repository: ${{ github.repository }}
-          workflow: frontend-cd.yml
-          ref: main
+          event-type: frontend-cd

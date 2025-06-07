@@ -1,0 +1,95 @@
+name: Monorepo Release
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  version-and-release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    outputs:
+      version: ${{ steps.cz.outputs.version }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python & Node.js
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install Commitizen
+        run: pip install commitizen
+
+      - name: Bump version and generate changelog
+        id: cz
+        run: |
+          cz bump --changelog --yes --config cz.toml
+          CZ_EXIT_CODE=$?
+          set -e
+          if [ $CZ_EXIT_CODE -eq 4 ] || [ $CZ_EXIT_CODE -eq 21 ]; then
+            echo "No changes to commit, skipping version bump."
+            VERSION=$(cz version --project --config cz.toml)
+            echo "NO_BUMP=1" >> $GITHUB_ENV
+          elif [ $CZ_EXIT_CODE -eq 0 ]; then
+            VERSION=$(cz version --project --config cz.toml)
+            echo "NO_BUMP=0" >> $GITHUB_ENV
+          else
+            exit $CZ_EXIT_CODE
+          fi
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Commit version/changelog changes
+        if: env.NO_BUMP == '0'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add .
+          git commit -m "chore(release): v${{ steps.cz.outputs.version }}"
+
+      - name: Push changes and tags
+        if: env.NO_BUMP == '0'
+        run: |
+          git push origin HEAD:main
+          git push origin --tags
+
+      - name: Create GitHub Release
+        if: env.NO_BUMP == '0'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release create "v${{ steps.cz.outputs.version }}" \
+            --repo="$GITHUB_REPOSITORY" \
+            --title="Release ${{ steps.cz.outputs.version }}" \
+            --notes-file=CHANGELOG.md
+
+  trigger-backend-cd:
+    needs: version-and-release
+    runs-on: ubuntu-latest
+    if: needs.version-and-release.outputs.version != ''
+    steps:
+      - name: Trigger backend-cd workflow
+        uses: peter-evans/workflow-dispatch@v1
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          repository: ${{ github.repository }}
+          workflow: backend-cd.yml
+          ref: main
+
+  trigger-frontend-cd:
+    needs: version-and-release
+    runs-on: ubuntu-latest
+    if: needs.version-and-release.outputs.version != ''
+    steps:
+      - name: Trigger frontend-cd workflow
+        uses: peter-evans/workflow-dispatch@v1
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          repository: ${{ github.repository }}
+          workflow: frontend-cd.yml
+          ref: main

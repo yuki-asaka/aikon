@@ -2,6 +2,8 @@ name: Frontend CD
 
 on:
   workflow_dispatch:
+  repository_dispatch:
+    types: [frontend-cd]
 
 jobs:
   build-and-deploy:

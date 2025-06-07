@@ -1,107 +1,9 @@
 name: Deploy Backend to Cloud Run
 on:
-  push:
-    branches:
-      - main
   workflow_dispatch:
 
 jobs:
-  version-and-release:
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-    outputs:
-      new_tag: ${{ steps.cz.outputs.version }}
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.x'
-
-      - name: Show working directory before Commitizen install
-        run: |
-          pwd
-          ls -l
-
-      - name: Install Commitizen
-        run: pip install commitizen
-
-      - name: Show working directory before cz bump
-        run: |
-          pwd
-          ls -l
-        working-directory: backend
-
-      - name: Bump version and generate changelog
-        id: cz
-        run: |
-          set +e
-          cz bump --changelog --yes
-          CZ_EXIT_CODE=$?
-          set -e
-          if [ $CZ_EXIT_CODE -eq 4 ] || [ $CZ_EXIT_CODE -eq 21 ]; then
-            echo "No changes to commit, skipping version bump."
-            VERSION=$(cz version --project)
-            echo "NO_BUMP=1" >> $GITHUB_ENV
-          elif [ $CZ_EXIT_CODE -eq 0 ]; then
-            VERSION=$(cz version --project)
-            echo "NO_BUMP=0" >> $GITHUB_ENV
-          else
-            exit $CZ_EXIT_CODE
-          fi
-          echo "version=$VERSION" >> $GITHUB_OUTPUT
-        working-directory: backend
-
-      - name: Commit version/changelog changes
-        if: env.NO_BUMP == '0'
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add pyproject.toml CHANGELOG.md
-          git commit -m "chore(release): v${{ steps.cz.outputs.version }}"
-        working-directory: backend
-
-      - name: Show working directory before push
-        if: env.NO_BUMP == '0'
-        run: |
-          pwd
-          ls -l
-        working-directory: backend
-
-      - name: Push changes and tags
-        if: env.NO_BUMP == '0'
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git push origin HEAD:main
-          git push origin --tags
-        working-directory: backend
-
-      - name: Show working directory before release
-        if: env.NO_BUMP == '0' && hashFiles('CHANGELOG.md') != ''
-        run: |
-          pwd
-          ls -l
-        working-directory: backend
-
-      - name: Create GitHub Release
-        if: env.NO_BUMP == '0' && hashFiles('CHANGELOG.md') != ''
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          TAG="v${{ steps.cz.outputs.version }}"
-          REPO_NAME=$(basename "$GITHUB_REPOSITORY")
-          TITLE="$REPO_NAME ${{ steps.cz.outputs.version }}"
-          gh release create "$TAG" \
-            --repo="$GITHUB_REPOSITORY" \
-            --title="$TITLE" \
-            --notes-file=CHANGELOG.md
-        working-directory: backend
-
   backend-deploy:
-    needs: version-and-release
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -170,7 +72,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           ISSUES: ${{ needs.backend-deploy.outputs.ISSUES }}
-          REF: ${{ needs.version-and-release.outputs.new_tag }}
+          REF: ${{ github.ref }}
         run: |
           for issue in $(echo "$ISSUES" | jq '.[]'); do
             gh issue comment "$issue" --body ":rocket: Backend has been successfully deployed to Cloud Run!（$REF）"

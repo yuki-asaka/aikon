@@ -125,7 +125,7 @@ async def generate_illustration(
             input_bytes = image_bytes
 
         image = Image.open(io.BytesIO(input_bytes)).convert("RGB")
-        image = crop_center_face_opencv(image, 2048)
+        image = crop_center_face_opencv(image, 1024)
         with tempfile.NamedTemporaryFile(delete=False, suffix=".png") as tmp:
             image.save(tmp, format="PNG")
             tmp.flush()
